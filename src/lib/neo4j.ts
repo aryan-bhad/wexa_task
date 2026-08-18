@@ -9,8 +9,11 @@ import neo4j, { Driver, Session, QueryResult } from "neo4j-driver";
  * connection pools, authentication, and session execution on the server side.
  */
 
-// Singleton driver instance reference across Next.js server invocations
-let driverInstance: Driver | null = null;
+// Declare global driver cache to survive Next.js Fast Refresh across HMR
+declare global {
+  // eslint-disable-next-line no-var
+  var __neo4jDriver: Driver | undefined;
+}
 
 /**
  * Validates and retrieves environment variable secrets.
@@ -29,19 +32,19 @@ function getDatabaseCredentials() {
  * Initializes driver connection pooling if not already instantiated.
  */
 export function getDriver(): Driver {
-  if (!driverInstance) {
+  if (!globalThis.__neo4jDriver) {
     const { uri, user, password } = getDatabaseCredentials();
 
-    driverInstance = neo4j.driver(
+    globalThis.__neo4jDriver = neo4j.driver(
       uri,
       neo4j.auth.basic(user, password),
       {
-        maxConnectionPoolSize: 25,
-        maxConnectionLifetime: 30000, // 30s max connection lifetime to recycle stale TLS sockets
+        maxConnectionPoolSize: 15,
+        maxConnectionLifetime: 60000, // 60s max connection lifetime
         connectionTimeout: 15000, // 15s connection timeout
-        connectionLivenessCheckTimeout: 5000, // Verify socket liveness before reusing pooled connection
+        connectionLivenessCheckTimeout: 1000, // Verify socket liveness before reusing pooled connection
         logging: {
-          level: "info",
+          level: "warn",
           logger: (level, message) => {
             if (process.env.NODE_ENV === "development" && !message.includes("ConnectionHolder")) {
               console.log(`[CognoDB ${level.toUpperCase()}] ${message}`);
@@ -52,8 +55,7 @@ export function getDriver(): Driver {
     );
   }
 
-
-  return driverInstance;
+  return globalThis.__neo4jDriver;
 }
 
 /**
@@ -129,24 +131,32 @@ export async function verifyDatabaseConnection(): Promise<{
     const errMessage = error instanceof Error ? error.message : String(error);
     console.error("[CognoDB Connection Failure]:", errMessage);
 
+    // Reset driver on connection failure so next attempt uses fresh socket
+    await closeDriver();
+
     return {
       connected: false,
       message: `Database unreachable: ${errMessage}`,
     };
   } finally {
     if (session) {
-      await session.close();
+      try {
+        await session.close();
+      } catch {
+        // Ignore session close error
+      }
     }
   }
 }
 
 /**
  * Executes a parameterized read Cypher query within a managed session context.
- * Automatically closes the session upon completion or error.
+ * Automatically handles retries and driver recycling if socket disconnected / reset.
  */
 export async function executeReadQuery<T = Record<string, unknown>>(
   cypher: string,
-  parameters: Record<string, unknown> = {}
+  parameters: Record<string, unknown> = {},
+  isRetry = false
 ): Promise<T[]> {
   const driver = getDriver();
   const session = driver.session({ defaultAccessMode: neo4j.session.READ });
@@ -157,20 +167,45 @@ export async function executeReadQuery<T = Record<string, unknown>>(
       const rawObj = record.toObject();
       return sanitizeNeo4jData<T>(rawObj);
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : String(error);
+    console.warn(`[CognoDB Query Attempt ${isRetry ? "2" : "1"} Failed]: ${errMessage}`);
+
+    // If socket was reset or disconnected and we haven't retried yet, recycle driver and retry once
+    const isSocketOrConnectionIssue =
+      errMessage.includes("ECONNRESET") ||
+      errMessage.includes("ServiceUnavailable") ||
+      errMessage.includes("socket disconnected") ||
+      errMessage.includes("SessionExpired") ||
+      errMessage.includes("Connection lost");
+
+    if (!isRetry && isSocketOrConnectionIssue) {
+      console.log("[CognoDB Auto-Recovery] Recycling connection pool and retrying query...");
+      await closeDriver();
+      return executeReadQuery<T>(cypher, parameters, true);
+    }
+
     console.error("[CognoDB Read Query Error]:", { cypher, parameters, error });
     throw error;
   } finally {
-    await session.close();
+    try {
+      await session.close();
+    } catch {
+      // Ignore session close errors
+    }
   }
 }
 
 /**
- * Closes the singleton driver connection during application shutdown.
+ * Closes the singleton driver connection during application shutdown or recovery.
  */
 export async function closeDriver(): Promise<void> {
-  if (driverInstance) {
-    await driverInstance.close();
-    driverInstance = null;
+  if (globalThis.__neo4jDriver) {
+    try {
+      await globalThis.__neo4jDriver.close();
+    } catch {
+      // Ignore close errors
+    }
+    globalThis.__neo4jDriver = undefined;
   }
 }

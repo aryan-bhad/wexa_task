@@ -10,6 +10,7 @@ Built with **Next.js 16 (App Router)**, **React 19**, **TypeScript**, **React Fl
 
 - **GitHub Repository**: [https://github.com/aryan-bhad/wexa_task](https://github.com/aryan-bhad/wexa_task)
 - **Live Demo Application**: [https://techgraph-pi.vercel.app](https://techgraph-pi.vercel.app)
+- **🎬 Video Demonstration**: [Watch Full Video Demo (`videos/wexa_task_work.mp4`)](./videos/wexa_task_work.mp4)
 - **Additional Documentation**:
   - [Master Knowledge Audit & Interview Guide](./TECHGRAPH_MASTER_INTERVIEW_GUIDE.md)
   - [Application Testing & Presentation Guide](./TECHGRAPH_TESTING_AND_PRESENTATION_GUIDE.md)
@@ -53,6 +54,26 @@ This structure allows complex multi-hop queries—such as finding all lead maint
 - **Interactive Focus & Path Highlighting**: Clicking any node highlights all direct and transitive connection paths with animated edges while dimming unrelated nodes to 40% opacity.
 - **Database Connectivity Heartbeat**: Real-time health monitoring badge connected to `/api/health` with diagnostic guidance for connection troubleshooting.
 - **Parameterized Cypher Query Layer**: Server-side query service enforcing parameterized openCypher execution to completely prevent Cypher injection.
+
+---
+
+## 🎥 Video Demonstration & Workflow Guide
+
+> [!TIP]
+> **Click the link below to watch the complete end-to-end walkthrough video of TechGraph:**  
+> 🎬 **[▶️ Open Video Demonstration (`videos/wexa_task_work.mp4`)](./videos/wexa_task_work.mp4)**
+
+### What is Demonstrated in the Video
+
+| Step / Workflow | Key Features Shown | How It Works & What to Observe |
+|---|---|---|
+| **1. Overview & Canvas** | Topological Knowledge Graph | Visualizes 26 nodes across 5 hierarchical layers (`Company` → `Project` → `Repository` → `Technology`/`Skill` → `Developer`) powered by the custom Sugiyama layout algorithm. |
+| **2. Interactive Focus** | Node Selection & Path Highlighting | Clicking any node (e.g., `auth-core-service`) illuminates its active connected subgraph with blue animated edges while dimming unrelated nodes to 45% opacity. |
+| **3. Entity Inspector** | Contextual Detail Drawer | Slide-out right panel showing comprehensive entity attributes, properties table, and connected relationship tags (`HAS_SKILL`, `CONTRIBUTES_TO`, `DEPENDS_ON`). |
+| **4. Global Search** | Command Palette (`⌘K` / `Ctrl+K`) | Keyboard-first search modal with real-time fuzzy filtering across all developers, repositories, and technologies with instant canvas auto-centering. |
+| **5. Transitive Blast Radius** | Downstream Dependency Analysis | Selecting an infrastructure or core library repo calculates variable-depth downstream impact level-by-level (`+1`, `+2`, `+3`, `+4` hops) with affected service counts. |
+| **6. Incident Escalation** | Multi-Hop On-Call Tracing | 3-hop openCypher graph traversal that identifies on-call engineers, lead maintainers, and primary contact emails across downstream systems for incident triage. |
+| **7. Real-Time Heartbeat** | CognoDB Cloud Health Check | Real-time Bolt protocol connectivity indicator verifying active openCypher database query execution. |
 
 ---
 
