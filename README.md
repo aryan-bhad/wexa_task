@@ -9,7 +9,7 @@ Built with **Next.js 16 (App Router)**, **React 19**, **TypeScript**, **React Fl
 ## 🔗 Project Links
 
 - **GitHub Repository**: [https://github.com/aryan-bhad/wexa_task](https://github.com/aryan-bhad/wexa_task)
-- **Live Demo**: *Not currently deployed (Follow the [Getting Started](#-getting-started) instructions to run locally)*
+- **Live Demo Application**: [https://techgraph-pi.vercel.app](https://techgraph-pi.vercel.app)
 - **Additional Documentation**:
   - [Master Knowledge Audit & Interview Guide](./TECHGRAPH_MASTER_INTERVIEW_GUIDE.md)
   - [Application Testing & Presentation Guide](./TECHGRAPH_TESTING_AND_PRESENTATION_GUIDE.md)
