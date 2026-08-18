@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-border: #e2e8f0;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --secondary: #0284c7;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --status-healthy: #16a34a;
+  --status-degraded: #d97706;
+  --status-outage: #dc2626;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Light Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Light Surface Helper */
+.light-surface {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+}
+
+/* Graph Canvas Background Dot Grid Pattern */
+.graph-grid-bg {
+  background-color: #f8fafc;
+  background-image: radial-gradient(#cbd5e1 1.25px, transparent 1.25px);
+  background-size: 24px 24px;
+}
+
+/* React Flow custom edge label animation */
+@keyframes edgeFlow {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.react-flow__edge-path.animated {
+  stroke-dasharray: 6;
+  animation: edgeFlow 1s linear infinite;
+}
+
